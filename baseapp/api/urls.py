@@ -14,5 +14,6 @@ urlpatterns = [
     path('getallcourses/', views.getAllCourses),
     path('getalllectures/', views.getAllLectures),
     path('course/<str:slug>', views.getParticularCourse),
+    path('getcourselectures/<str:slug>', views.getAllLecturesOfCourse),
     path('lecture/<str:slug>', views.getParticularLecture),
 ]

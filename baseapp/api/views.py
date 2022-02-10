@@ -43,7 +43,18 @@ def getAllCourses(request):
 
 @api_view(["GET"])
 def getParticularCourse(request, slug):
-    pass
+    course = Course.objects.get(slug=slug)
+    serializer = CourseSerializer(course)
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def getAllLecturesOfCourse(request, slug):
+    course = Course.objects.get(slug=slug)
+    print(course)
+    lectuers = Lecture.objects.filter(course=course)
+    print(lectuers)
+    serializer = LectureSerializer(lectuers, many=True)
+    return Response(serializer.data)
 
 @api_view(["GET"])
 def getParticularLecture(request, slug):
