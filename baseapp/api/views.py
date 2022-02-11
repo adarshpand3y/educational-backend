@@ -58,8 +58,9 @@ def getAllLecturesOfCourse(request, slug):
 @api_view(["GET"])
 def getParticularLecture(request, slug):
     lecture = Lecture.objects.get(slug=slug)
+    course = CourseSerializer(lecture.course)
     serializedLecture = LectureSerializer(lecture)
     lectures = Lecture.objects.filter(course=lecture.course).order_by('course_index')
     serializedLectureList = LectureSerializer(lectures, many=True)
-    responseDictionary = {"lectureData": serializedLecture.data, "lectureList": serializedLectureList.data}
+    responseDictionary = {"lectureData": serializedLecture.data, "lectureList": serializedLectureList.data, "course": course.data}
     return Response(responseDictionary)
