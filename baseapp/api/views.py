@@ -1,3 +1,4 @@
+from urllib import response
 from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -50,12 +51,15 @@ def getParticularCourse(request, slug):
 @api_view(["GET"])
 def getAllLecturesOfCourse(request, slug):
     course = Course.objects.get(slug=slug)
-    print(course)
-    lectuers = Lecture.objects.filter(course=course)
-    print(lectuers)
-    serializer = LectureSerializer(lectuers, many=True)
+    lectures = Lecture.objects.filter(course=course)
+    serializer = LectureSerializer(lectures, many=True)
     return Response(serializer.data)
 
 @api_view(["GET"])
 def getParticularLecture(request, slug):
-    pass
+    lecture = Lecture.objects.get(slug=slug)
+    serializedLecture = LectureSerializer(lecture)
+    lectures = Lecture.objects.filter(course=lecture.course).order_by('course_index')
+    serializedLectureList = LectureSerializer(lectures, many=True)
+    responseDictionary = {"lectureData": serializedLecture.data, "lectureList": serializedLectureList.data}
+    return Response(responseDictionary)
