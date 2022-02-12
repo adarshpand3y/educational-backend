@@ -1,5 +1,4 @@
-from urllib import response
-from django.http import JsonResponse
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
@@ -8,6 +7,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from baseapp.models import Course, Lecture
 from .serializers import CourseSerializer, LectureSerializer
+
+from django.contrib.auth.models import User
+from baseapp.models import UserDetails
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -29,6 +31,67 @@ def getRoutes(request):
         '/api/token/refresh'
     ]
     return Response(routes)
+
+@api_view(["POST"])
+def createUser(request):
+    firstname = request.data.firstname
+    lastname = request.data.lastname
+    username = request.data.username
+    email = request.data.email
+    password = request.data.password
+    conf_password = request.data.conf_password
+
+    # check for errorneous input
+    if len(firstname) < 3:
+        return Response({"error": "First Name is too short"}, status=status.HTTP_400_BAD_REQUEST)
+    if len(firstname) > 15:
+        return Response({"error": "First Name is too big"}, status=status.HTTP_400_BAD_REQUEST)
+    if len(lastname) < 3:
+        return Response({"error": "Last Name is too short."}, status=status.HTTP_400_BAD_REQUEST)
+    if len(lastname) > 15:
+        return Response({"error": "Last Name is too big."}, status=status.HTTP_400_BAD_REQUEST)
+    if len(username) < 8:
+        return Response({"error": "Username is too short. Minimum 8 characters."}, status=status.HTTP_400_BAD_REQUEST)
+    if len(username) > 15:
+        return Response({"error": "Username is too big. Maximum 15 characters."}, status=status.HTTP_400_BAD_REQUEST)
+    if password != conf_password:
+        return Response({"error": "Passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(username=username).exists():
+        return Response({"error": "A user with that username already exists."}, status=status.HTTP_400_BAD_REQUEST)
+    if User.objects.filter(email=email).exists():
+        return Response({"error": "A user with that email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Create the user
+    myuser = User.objects.create_user(username, email, password)
+    myuser.first_name = firstname
+    myuser.last_name = lastname
+    myuser.save()
+    return Response({"success": "User created successfully."})
+
+@api_view(["POST"])
+def setUserDetails(request):
+    username = request.data.username
+    add1 = request.data.add1
+    add2 = request.data.add2
+    city = request.data.city
+    state = request.data.state
+    pincode = request.data.pincode
+    landmark = request.data.landmark
+
+    myuser = User.objects.get(username=username)
+
+    print(add1, add2, city, state, pincode, landmark)
+    details = UserDetails(
+        user=myuser,
+        address1=add1,
+        address2=add2,
+        city=city,
+        state=state,
+        pincode=pincode,
+        landmark=landmark
+    )
+    details.save()
+    return Response({"success": "Details saved successfully."})
 
 @api_view(["GET"])
 def getAllLectures(request):

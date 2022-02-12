@@ -1,6 +1,7 @@
 from django.db import models
 from django.template.defaultfilters import truncatechars
 from django.utils.text import slugify
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -51,3 +52,89 @@ class Lecture(models.Model):
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         super(Lecture, self).save(*args, **kwargs)
+
+class Product(models.Model):
+    product_name = models.CharField(max_length=50, unique=True)
+    high_price = models.IntegerField(default=0)
+    price = models.IntegerField(default=0)
+    stock = models.IntegerField(default=0)
+    description = models.TextField()
+    image1 = models.TextField(max_length=200, default="")
+    image2 = models.TextField(max_length=200, default="")
+    image3 = models.TextField(max_length=200, default="")
+    slug = models.SlugField(blank=True, help_text=('Leave this parameter empty, it will get generated automatically.'))
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.product_name)
+        super(Product, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.product_name
+
+class Order(models.Model):
+    order_choices = [
+        ("OPS", 'Order Placed Successfully'),
+        ("S", 'Shipped'),
+        ("OFD", 'Out For Delivery'),
+        ("D", 'Delivered'),
+        ]
+    items = models.TextField(help_text=(f"Customer's Orders"))
+    total_cost = models.IntegerField(default=0)
+    code_applied = models.CharField(default="", max_length=20)
+    discounted_cost = models.IntegerField(default=0)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, help_text=(f"User who placed this order."))
+    first_name = models.CharField(max_length=50, default="")
+    last_name = models.CharField(max_length=50, default="")
+    address1 = models.CharField(max_length=100, default="")
+    address2 = models.CharField(max_length=100, default="")
+    email = models.CharField(max_length=50, default="")
+    phone = models.CharField(max_length=50, default="")
+    city = models.CharField(max_length=50, default="")
+    state = models.CharField(max_length=50, default="")
+    pincode = models.CharField(max_length=50, default="")
+    landmark = models.CharField(max_length=50, default="")
+    ordered_at = models.DateTimeField(auto_now_add=True, help_text=(f"Do NOT change this date and time field."))
+    last_changed_at = models.DateTimeField(auto_now=True, help_text=(f"Do NOT change this date and time field."))
+    status = models.CharField(max_length=5, choices=order_choices, default="Order Placed Successfully", help_text=(f"Change this only when you are sure. This sends an email to the user regarding the update."))
+
+    def __str__(self):
+        return f"Order Id: {self.id}"
+
+class Coupon(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=20)
+    discount_percentage = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=0)
+    description = models.CharField(max_length=100)
+    val = models.FloatField(blank=True, help_text="Do NOT change this field. It gets updated automatically.")
+
+    @property
+    def user(self):
+        return self.user
+
+    def save(self, *args, **kwargs):
+        self.val = self.discount_percentage/100
+        super(Coupon, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Coupon: {self.name}"
+
+class UserDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    number = models.IntegerField()
+    address1 = models.CharField(max_length=200)
+    address2 = models.CharField(max_length=200)
+    city = models.CharField(max_length=200)
+    state = models.CharField(max_length=50)
+    pincode = models.IntegerField()
+    landmark = models.CharField(max_length=50)
+
+    @property
+    def user(self):
+        return self.user
+
+    def __str__(self):
+        return self.user.username
+    
+    class Meta:
+        verbose_name_plural = "User Details"
