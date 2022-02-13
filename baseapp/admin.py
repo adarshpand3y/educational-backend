@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Course, Lecture, Product, Order, Coupon, UserDetails
+from .models import Course, Lecture, Product, Order, Coupon, UserDetails, BlogPost
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('short_name', 'short_description')
@@ -19,6 +19,9 @@ class CouponAdmin(admin.ModelAdmin):
 class UserDetailsAdmin(admin.ModelAdmin):
     list_display = ('user', 'city', 'state')
 
+class BlogPostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'publish_date', 'privacy', 'views')
+
 # Register your models here.
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Lecture, LectureAdmin)
@@ -26,3 +29,4 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(UserDetails, UserDetailsAdmin)
+admin.site.register(BlogPost, BlogPostAdmin)

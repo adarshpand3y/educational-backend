@@ -121,7 +121,7 @@ class Coupon(models.Model):
 
 class UserDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    number = models.IntegerField()
+    number = models.IntegerField(default=0)
     address1 = models.CharField(max_length=200)
     address2 = models.CharField(max_length=200)
     city = models.CharField(max_length=200)
@@ -138,3 +138,20 @@ class UserDetails(models.Model):
     
     class Meta:
         verbose_name_plural = "User Details"
+
+class BlogPost(models.Model):
+    title = models.CharField(max_length=256, help_text=('Write the title within 200 characters.'))
+    description = models.TextField(help_text='Write a desctiprion of this blog in a few sentences')
+    body = models.TextField(help_text=('Your main content goes here.'))
+    views = models.IntegerField(default=0, help_text=('This statistic is for your reference, do not change it.'))
+    publish_date = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    privacy = models.CharField(max_length=10, choices=[("PRIVATE", 'Private'), ("PUBLIC", 'Public')], default="PRIVATE", help_text=('Public posts will appear to everyone and private posts only to you. Change this to private instead of deleting a post.'))
+    slug = models.SlugField(blank=True, help_text=('Leave this parameter empty, it will get generated automatically.'))
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super(BlogPost, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title

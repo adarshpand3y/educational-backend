@@ -5,8 +5,9 @@ from rest_framework.decorators import api_view
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from baseapp.models import Course, Lecture
-from .serializers import CourseSerializer, LectureSerializer
+from baseapp.models import Course, Lecture, BlogPost
+from django.core.paginator import Paginator, EmptyPage
+from .serializers import BlogPostSerializer, CourseSerializer, LectureSerializer
 
 from django.contrib.auth.models import User
 from baseapp.models import UserDetails
@@ -127,3 +128,31 @@ def getParticularLecture(request, slug):
     serializedLectureList = LectureSerializer(lectures, many=True)
     responseDictionary = {"lectureData": serializedLecture.data, "lectureList": serializedLectureList.data, "course": course.data}
     return Response(responseDictionary)
+
+@api_view(["GET"])
+def blogs(request, pageNum):
+    blogs = BlogPost.objects.exclude(privacy="PRIVATE").order_by("-publish_date")
+    p = Paginator(blogs, 5) # Change this 1 to the required number of blogs per page in produciton
+    try:
+        blogs = p.page(pageNum)
+    except EmptyPage:
+        blogs = p.page(1)
+    serializer = BlogPostSerializer(blogs, many=True)
+    totalNumberOfPages = p.num_pages
+    responseDict = {"blogs": serializer.data, "totalNumberOfPages": totalNumberOfPages}
+    return Response(responseDict)
+
+@api_view(["GET"])
+def blogpost(request, slug):
+    try:
+        blog = BlogPost.objects.get(slug=slug)
+    except:
+        return Response({"error": "Blog Not Found."}, status=status.HTTP_404_NOT_FOUND)
+    if blog.privacy == "PUBLIC":
+        blog.views += 1
+        blog.save()
+        serializer = BlogPostSerializer(blog)
+        return Response(serializer.data)
+    else:
+        return Response({"error": "Blog Not Found."}, status=status.HTTP_404_NOT_FOUND)
+    
