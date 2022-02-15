@@ -121,7 +121,10 @@ class Coupon(models.Model):
 
 class UserDetails(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    # TODO: unused field
     number = models.IntegerField(default=0)
+
     address1 = models.CharField(max_length=200)
     address2 = models.CharField(max_length=200)
     city = models.CharField(max_length=200)
@@ -129,9 +132,10 @@ class UserDetails(models.Model):
     pincode = models.IntegerField()
     landmark = models.CharField(max_length=50)
 
-    @property
-    def user(self):
-        return self.user
+    # TODO: remove, if not required
+    # @property
+    # def user(self):
+    #     return self.user
 
     def __str__(self):
         return self.user.username

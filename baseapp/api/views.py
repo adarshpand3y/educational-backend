@@ -8,6 +8,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from baseapp.models import Course, Lecture, BlogPost
 from django.core.paginator import Paginator, EmptyPage
 from .serializers import BlogPostSerializer, CourseSerializer, LectureSerializer
+from .validators import *
 
 from django.contrib.auth.models import User
 from baseapp.models import UserDetails
@@ -35,64 +36,128 @@ def getRoutes(request):
 
 @api_view(["POST"])
 def createUser(request):
-    firstname = request.data.firstname
-    lastname = request.data.lastname
-    username = request.data.username
-    email = request.data.email
-    password = request.data.password
-    conf_password = request.data.conf_password
+    firstname = request.data.get("firstname", "")
+    lastname = request.data.get("lastname", "")
+    username = request.data.get("username", "")
+    email = request.data.get("email", "")
+    password = request.data.get("password", "")
+    conf_password = request.data.get("conf_password", "")
+
+    add1 = request.data.get("add1", "")
+    add2 = request.data.get("add2", "")
+    city = request.data.get("city", "")
+    state = request.data.get("state", "")
+    pincode = request.data.get("pincode", "")
+    landmark = request.data.get("landmark", "")
 
     # check for errorneous input
-    if len(firstname) < 3:
-        return Response({"error": "First Name is too short"}, status=status.HTTP_400_BAD_REQUEST)
-    if len(firstname) > 15:
-        return Response({"error": "First Name is too big"}, status=status.HTTP_400_BAD_REQUEST)
-    if len(lastname) < 3:
-        return Response({"error": "Last Name is too short."}, status=status.HTTP_400_BAD_REQUEST)
-    if len(lastname) > 15:
-        return Response({"error": "Last Name is too big."}, status=status.HTTP_400_BAD_REQUEST)
-    if len(username) < 8:
-        return Response({"error": "Username is too short. Minimum 8 characters."}, status=status.HTTP_400_BAD_REQUEST)
-    if len(username) > 15:
-        return Response({"error": "Username is too big. Maximum 15 characters."}, status=status.HTTP_400_BAD_REQUEST)
-    if password != conf_password:
-        return Response({"error": "Passwords do not match."}, status=status.HTTP_400_BAD_REQUEST)
-    if User.objects.filter(username=username).exists():
-        return Response({"error": "A user with that username already exists."}, status=status.HTTP_400_BAD_REQUEST)
-    if User.objects.filter(email=email).exists():
-        return Response({"error": "A user with that email already exists."}, status=status.HTTP_400_BAD_REQUEST)
-    
+    # TODO: use better way, is this robust enough ?
+    # TODO: test all validation logics thoroughly, before production
+
+    errors = {}
+    errors["username"] = checkUname(uname=username)
+    errors["firstname"] = checkFirstname(firstname=firstname)
+    errors["lastname"] = checkLastname(lastname=lastname)
+    errors["password"] = checkPassword(
+        password=password,
+        username=username,
+        firstname=firstname,
+        lastname=lastname,
+        email=email,
+    )
+    errors["conf_password"] = checkConfPassword(
+        password=password, confPassword=conf_password
+    )
+    errors["email"] = checkEmail(email)
+
+    if (
+        (not add1)
+        or (not add2)
+        or (not city)
+        or (not state)
+        or (not pincode)
+        or (not landmark)
+    ):
+        errors[
+            "userdetails"
+        ] = "All of the adresses, city, state, pincode and landmark fields are required."
+
+    # remove field(s), which has empty no error
+    errors = {k: v for (k, v) in errors.items() if v}
+
+    if len(errors) > 0:
+        return Response({"error": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    # if len(firstname) < 3:
+    #     return Response({"error": {"firstname": "First Name is too short"}}, status=status.HTTP_400_BAD_REQUEST)
+    # if len(firstname) > 15:
+    #     return Response({"error": {"fristname": "First Name is too big"}}, status=status.HTTP_400_BAD_REQUEST)
+    # if len(lastname) < 3:
+    #     return Response({"error": {"lastname": "Last Name is too short."}}, status=status.HTTP_400_BAD_REQUEST)
+    # if len(lastname) > 15:
+    #     return Response({"error": {"lastname": "Last Name is too big."}}, status=status.HTTP_400_BAD_REQUEST)
+    # if len(username) < 8:
+    #     return Response({"error": {"username": "Username is too short. Minimum 8 characters."}}, status=status.HTTP_400_BAD_REQUEST)
+    # if len(username) > 15:
+    #     return Response({"error": {"username": "Username is too big. Maximum 15 characters."}}, status=status.HTTP_400_BAD_REQUEST)
+    # if password != conf_password:
+    #     return Response({"error": {"confPassword": "Passwords do not match."}}, status=status.HTTP_400_BAD_REQUEST)
+    # if User.objects.filter(username=username).exists():
+    #     return Response({"error": {"username": "A user with that username already exists."}}, status=status.HTTP_400_BAD_REQUEST)
+    # if User.objects.filter(email=email).exists():
+    #     return Response({"error": {"email": "A user with that email already exists."}}, status=status.HTTP_400_BAD_REQUEST)
+
     # Create the user
-    myuser = User.objects.create_user(username, email, password)
-    myuser.first_name = firstname
-    myuser.last_name = lastname
-    myuser.save()
-    return Response({"success": "User created successfully."})
+    myuser = User.objects.create(
+        username=username,
+        email=email,
+        password=password,
+        first_name=firstname,
+        last_name=lastname,
+    )
 
-@api_view(["POST"])
-def setUserDetails(request):
-    username = request.data.username
-    add1 = request.data.add1
-    add2 = request.data.add2
-    city = request.data.city
-    state = request.data.state
-    pincode = request.data.pincode
-    landmark = request.data.landmark
-
-    myuser = User.objects.get(username=username)
-
-    print(add1, add2, city, state, pincode, landmark)
-    details = UserDetails(
+    details = UserDetails.objects.create(
         user=myuser,
+        # TODO: unused field
+        number=1234,
         address1=add1,
         address2=add2,
         city=city,
         state=state,
         pincode=pincode,
-        landmark=landmark
+        landmark=landmark,
     )
-    details.save()
-    return Response({"success": "Details saved successfully."})
+
+    return Response({"success": "User created, details saved successfully."})
+    return Response(
+        {"success": "User created, details saved successfully.", "userDetails": details}
+    )
+
+# unused function...
+# @api_view(["POST"])
+# def setUserDetails(request):
+#     username = request.data.username
+#     add1 = request.data.add1
+#     add2 = request.data.add2
+#     city = request.data.city
+#     state = request.data.state
+#     pincode = request.data.pincode
+#     landmark = request.data.landmark
+
+#     myuser = User.objects.get(username=username)
+
+#     print(add1, add2, city, state, pincode, landmark)
+#     details = UserDetails(
+#         user=myuser,
+#         address1=add1,
+#         address2=add2,
+#         city=city,
+#         state=state,
+#         pincode=pincode,
+#         landmark=landmark
+#     )
+#     details.save()
+#     return Response({"success": "Details saved successfully."})
 
 @api_view(["GET"])
 def getAllLectures(request):
