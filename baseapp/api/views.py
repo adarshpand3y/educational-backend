@@ -1,3 +1,4 @@
+from itertools import product
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -5,10 +6,10 @@ from rest_framework.decorators import api_view
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from baseapp.models import Course, Lecture, BlogPost
+from baseapp.models import Course, Lecture, BlogPost, Product
 from django.core.paginator import Paginator, EmptyPage
-from .serializers import BlogPostSerializer, CourseSerializer, LectureSerializer
 from .validators import *
+from .serializers import BlogPostSerializer, CourseSerializer, LectureSerializer, ProductSerializer
 
 from django.contrib.auth.models import User
 from baseapp.models import UserDetails
@@ -220,4 +221,36 @@ def blogpost(request, slug):
         return Response(serializer.data)
     else:
         return Response({"error": "Blog Not Found."}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(["GET"])
+def products(request):
+    products = Product.objects.all()
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def product(request, slug):
+    product = Product.objects.get(slug=slug)
+    serializer = ProductSerializer(product)
+    return Response(serializer.data)
+
+@api_view(["GET"])
+def getcheckoutdetails(request, typeOfProduct, slug):
+    print(typeOfProduct, slug)
+    if typeOfProduct == "product":
+        try:
+            product = Product.objects.get(slug=slug)
+        except:
+            return Response({"error":"No such product found!"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ProductSerializer(product)
+        return Response(serializer.data)
+
+    elif typeOfProduct == "course":
+        try:
+            course = Course.objects.get(slug=slug)
+        except:
+            return Response({"error":"No such course found!"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CourseSerializer(course)
+        return Response(serializer.data)
     
+    return Response({"error":"No such item found!"}, status=status.HTTP_400_BAD_REQUEST)

@@ -22,4 +22,8 @@ urlpatterns = [
 
     path('blogs/<int:pageNum>', views.blogs),
     path('blog/<str:slug>', views.blogpost),
+    path('products/', views.products),
+    path('product/<str:slug>', views.product),
+
+    path('getcheckoutdetails/<str:typeOfProduct>/<str:slug>', views.getcheckoutdetails),
 ]

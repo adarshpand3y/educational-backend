@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from baseapp.models import Course, Lecture, BlogPost
+from baseapp.models import Course, Lecture, BlogPost, Product
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,4 +15,9 @@ class LectureSerializer(serializers.ModelSerializer):
 class BlogPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = BlogPost
-        fields = ['id', 'title','description', 'body', 'views', 'publish_date', 'last_updated', 'slug']
+        fields = ['id', 'title', 'description', 'body', 'views', 'publish_date', 'last_updated', 'slug']
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = "__all__"
