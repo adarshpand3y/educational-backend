@@ -12,7 +12,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     path('signup/', views.createUser),
-    path('setuserdetails/', views.setUserDetails),
+    # path('setuserdetails/', views.setUserDetails), (unused...)
 
     path('getallcourses/', views.getAllCourses),
     path('getalllectures/', views.getAllLectures),
@@ -22,7 +22,6 @@ urlpatterns = [
 
     path('blogs/<int:pageNum>', views.blogs),
     path('blog/<str:slug>', views.blogpost),
-
     path('products/', views.products),
     path('product/<str:slug>', views.product),
 
