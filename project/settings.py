@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-j3sk0txq%nbyx%@p_d=d-_ug_@)&adoob2p7317xt-!*rwx$0n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '.netlify.app', '.trainskillz.com']
 
 
 # Application definition
