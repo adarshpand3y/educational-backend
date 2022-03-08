@@ -121,7 +121,7 @@ class Coupon(models.Model):
         return f"Coupon: {self.name}"
 
 class UserDetails(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    userForeignKey = models.ForeignKey(User, on_delete=models.CASCADE)
     
     # TODO: unused field
     number = models.IntegerField(default=0)

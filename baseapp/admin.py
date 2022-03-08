@@ -17,9 +17,13 @@ class CouponAdmin(admin.ModelAdmin):
     list_display = ('user', 'code', 'quantity')
 
 class UserDetailsAdmin(admin.ModelAdmin):
-    list_display = ('user', 'city', 'state')
+    list_display = ('userForeignKey', 'city', 'state')
 
+@admin.register(BlogPost)
 class BlogPostAdmin(admin.ModelAdmin):
+    class Media:
+        js = ("tinymce.js",)
+
     list_display = ('title', 'publish_date', 'privacy', 'views')
 
 # Register your models here.
@@ -29,4 +33,4 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Coupon, CouponAdmin)
 admin.site.register(UserDetails, UserDetailsAdmin)
-admin.site.register(BlogPost, BlogPostAdmin)
+# admin.site.register(BlogPost, BlogPostAdmin)

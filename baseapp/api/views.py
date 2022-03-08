@@ -118,7 +118,7 @@ def createUser(request):
     )
 
     details = UserDetails.objects.create(
-        user=myuser,
+        userForeignKey=myuser,
         # TODO: unused field
         number=1234,
         address1=add1,
