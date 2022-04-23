@@ -2,12 +2,21 @@ from django.contrib import admin
 from .models import Course, Lecture, Product, Order, Coupon, UserDetails, BlogPost
 
 class CourseAdmin(admin.ModelAdmin):
+    class Media:
+        js = ("tinymce.js",)
+        
     list_display = ('short_name', 'short_description')
 
 class LectureAdmin(admin.ModelAdmin):
+    class Media:
+        js = ("tinymce.js",)
+
     list_display = ('short_name', 'short_course', 'course_index')
 
 class ProductAdmin(admin.ModelAdmin):
+    class Media:
+        js = ("tinymce.js",)
+        
     list_display = ('product_name', 'price', 'stock')
 
 class OrderAdmin(admin.ModelAdmin):
