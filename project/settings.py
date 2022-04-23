@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
+import django_heroku
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,9 +26,9 @@ from datetime import timedelta
 SECRET_KEY = 'django-insecure-j3sk0txq%nbyx%@p_d=d-_ug_@)&adoob2p7317xt-!*rwx$0n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', '.netlify.app', '.trainskillz.com', 'trainskillz.herokuapp.com']
 
 
 # Application definition
@@ -179,3 +180,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static/",
 ]
+
+django_heroku.settings(locals())
+
+DEBUG_PROPAGATE_EXCEPTIONS = True

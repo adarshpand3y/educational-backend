@@ -58,11 +58,11 @@ class Product(models.Model):
     high_price = models.IntegerField(default=0)
     price = models.IntegerField(default=0)
     stock = models.IntegerField(default=0)
-    short_description = models.TextField(help_text='Write a brief description of the product here.')
+    short_description = models.CharField(max_length=300, help_text='Write a brief description of the product here.')
     description = models.TextField(help_text='This area holds the HTML to show on the product page.')
-    image1 = models.TextField(max_length=200, default="")
-    image2 = models.TextField(max_length=200, default="")
-    image3 = models.TextField(max_length=200, default="")
+    image1 = models.CharField(max_length=200, default="")
+    image2 = models.CharField(max_length=200, default="")
+    image3 = models.CharField(max_length=200, default="")
     slug = models.SlugField(blank=True, help_text=('Leave this parameter empty, it will get generated automatically.'))
 
     def save(self, *args, **kwargs):
@@ -152,7 +152,7 @@ class BlogPost(models.Model):
     publish_date = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     privacy = models.CharField(max_length=10, choices=[("PRIVATE", 'Private'), ("PUBLIC", 'Public')], default="PRIVATE", help_text=('Public posts will appear to everyone and private posts only to you. Change this to private instead of deleting a post.'))
-    slug = models.SlugField(blank=True, help_text=('Leave this parameter empty, it will get generated automatically.'))
+    slug = models.SlugField(max_length=256, blank=True, help_text=('Leave this parameter empty, it will get generated automatically.'))
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title)
