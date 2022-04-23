@@ -182,3 +182,5 @@ STATICFILES_DIRS = [
 ]
 
 django_heroku.settings(locals())
+
+DEBUG_PROPAGATE_EXCEPTIONS = True
